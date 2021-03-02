@@ -9,7 +9,9 @@ services:
         volumes:
             - './api:/api'
         command: >
-            sh -c "python manage.py runserver 0.0.0.0:8000"
+            sh -c "python manage.py wait_for_db && 
+                   python manage.py migrate && 
+                   python manage.py runserver 0.0.0.0:8000"
         environment:
             - DB_HOST=db
             - DB_NAME=recipeDb
@@ -25,3 +27,6 @@ services:
             - POSTGRES_DB=recipeDb
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=admin
+
+        ports:
+            - '5432:5432'
