@@ -14,7 +14,7 @@ class AdminSiteTests(TestCase):
             email='test@gmail.com', password='test123', name='Test user')
 
     def test_user_listed(self):
-        # Test that user are listed on user page
+        # Test that this user are listed on user page
         url = reverse('admin:core_user_changelist')
         res = self.client.get(url)
 
