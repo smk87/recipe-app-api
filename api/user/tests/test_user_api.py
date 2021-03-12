@@ -7,6 +7,7 @@ from rest_framework import status
 
 
 CREATE_USER_URL = reverse('user:create')
+TOKEN_URL = reverse('user:token')
 
 
 def create_user(**params):
@@ -60,3 +61,42 @@ class PublicUserApiTest(TestCase):
         ).exists()
 
         self.assertFalse(user_exists)
+
+    def test_create_token_for_user(self):
+        # Test that token is created for user
+        payload = {'email': 'abc@gmail.com', 'password': 'pass123'}
+
+        create_user(**payload)
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_create_token_invalid_credentials(self):
+        # Test that token is not created for invalid credentials
+        payload = {'email': 'abc@gmail.com', 'password': 'pass123'}
+
+        create_user(**payload)
+        res = self.client.post(
+            TOKEN_URL, {'email': 'abc@gmail.com', 'password': 'pass12'})
+
+        self.assertNotIn('token', res.data)
+        self.assertEquals(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_token_no_user(self):
+        # Test that token is not created if no use exist
+        payload = {'email': 'abc@gmail.com', 'password': 'pass123'}
+
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertNotIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_token_missing_field(self):
+        # Test that email and password are required
+        payload = {'email': 'abc', 'password': ''}
+
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertNotIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
